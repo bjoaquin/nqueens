@@ -14,4 +14,4 @@ Here's a list with the current files on this repo.
 * **queensRuntimeLinear.py**: solves puzzles of increasing size (1 to `UPPER_LIMIT`) using `nQueensLinear`, and records runtimes. Each size is solved multiple times, each time with a different starting point for the first column (since runtimes are heavily dependant on the initial state). Returns a scatterplot of average runtime versus size.
 
 ## Further resources
-I got the idea for this repo by following MIT's 6.S095 (**Programming for the Puzzled**) by Srini Devadas. This problem is tackled on the [fifth](https://www.youtube.com/watch?v=1_0WwiUUsTc&list=PLUl4u3cNGP62QumaaZtCCjkID-NgqrleA&index=5) and [sixth lecture](https://www.youtube.com/watch?v=Pe1MBDbGfwc&list=PLUl4u3cNGP62QumaaZtCCjkID-NgqrleA&index=6).
+I got the idea for this repo by following MIT's 6.S095 (**Programming for the Puzzled**) by Srini Devadas. This problem is tackled on the [fifth](https://www.youtube.com/watch?v=1_0WwiUUsTc&list=PLUl4u3cNGP62QumaaZtCCjkID-NgqrleA&index=5) and [sixth lectures](https://www.youtube.com/watch?v=Pe1MBDbGfwc&list=PLUl4u3cNGP62QumaaZtCCjkID-NgqrleA&index=6).
