@@ -4,7 +4,7 @@
 I will not introduce the problem myself. You can read about it [here](https://en.wikipedia.org/wiki/Eight_queens_puzzle).
 
 ## This repo
-There's currently 3 (three) files on this repo.
+Here's a list with the current files on this repo.
 
 * **queens.py**: contains two implementations of searches for solutions to the N-queens problem.
   - `eightQueensRandom()`: works only for N=8 and assumes at least one solution exists. Would run forever if there's no solution. Returns a different solution on every run.
