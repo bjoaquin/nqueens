@@ -11,6 +11,7 @@
 from random import randint
 from time import time
 
+
 def eightQueensRandom():
 	
 	def setToList(mySet):
@@ -57,10 +58,11 @@ def eightQueensRandom():
 	return setToList(Q), attempts, timeTaken
 
 
-def nQueensLinear(n=8, initialState=[]):
+
+def nQueensLinear(n=8, initialState=[], verbose=True):
 	
 	def conflict(board, col, row):
-		# Ignore placeholders (WORK IN PROGRESS!!!)
+		# Ignore placeholders
 		if row == -1:
 			return False
 		# Two or more queens on the same row?
@@ -68,36 +70,58 @@ def nQueensLinear(n=8, initialState=[]):
 			return True
 		# Two or more queens on the same diagonal?
 		for k in range(1, col+1):
-			if board[col-k] in [row+k, row-k]:
+			if abs(board[col-k] - row) == k:
 				return True
 		# All good!
 		return False
 
-	def checkBoard(board):
-		col = len(board)
+	def checkBoard(initialBoard, board=n*[-1], col=0):
+		
+		# Terminate if board is complete.
 		if col == n:
 			return board
-		for row in range(n):
-			if conflict(board, col, row):
-				continue
-			newBoard = checkBoard(board+[row])
-			if len(newBoard) == n:
+		
+		# If this col is already defined in the initial state,
+		# assign to it the corresponding value and carry on.
+		if initialBoard[col] != -1:
+			proposedBoard = board[::]
+			proposedBoard[col] = initialBoard[col]
+			newBoard = checkBoard(initialBoard, proposedBoard, col+1)
+			if len(newBoard) == n and (-1 not in newBoard):
 				return newBoard
+		# Else, propose each possible row as candidate, one at a time.
+		else:
+			for row in range(n):
+				if conflict(board, col, row):
+					continue
+				proposedBoard = board[::]
+				proposedBoard[col] = row
+				newBoard = checkBoard(initialBoard, proposedBoard, col+1)
+				if len(newBoard) == n and (-1 not in newBoard):
+					return newBoard
+		
 		return board
 
 	start = time()
 	Q = initialState
 
+	# Check for conflict within the initial state
 	if Q:
 		for k in range(1, len(Q)):
 			if conflict(Q[:k], k, Q[k]):
 				timeTaken = 1000 * (time() - start)
-				print('WARNING: Initial state is invalid.')
+				if verbose:
+					print('WARNING: Initial state is invalid.')
 				return [], timeTaken
 	
+	# Fill the "rest" of the initial state with -1
+	Q = Q + (n-len(Q))*[-1]
+
+	# Search for a solution (given initial state Q)
 	board = checkBoard(Q)
-	if len(board) < n:
-		print('No solution exists for this setting.')
+	if -1 in board:
+		if verbose:
+			print('No solution exists for this setting.')
 		board = []
 	
 	timeTaken = 1000 * (time() - start)
@@ -105,8 +129,12 @@ def nQueensLinear(n=8, initialState=[]):
 	return board, timeTaken
 
 
+
 def showSolution(solution):
 	N = len(solution)
+
+	if N == 0:
+		return 0
 
 	board = N * [N*"|   " + "|"]
 	boardJoints = N*"+---" + "+"
@@ -125,7 +153,7 @@ def showSolution(solution):
 
 if __name__ == '__main__':
 
-	mySolution, myTimeTaken = nQueensLinear(n=4)
+	mySolution, myTimeTaken = nQueensLinear(n=22, initialState=[])
 	print(f"Done! Took {round(myTimeTaken, 2)} milliseconds.")
 	
 	#mySolution, myAttempts, myTimeTaken = eightQueensRandom()
