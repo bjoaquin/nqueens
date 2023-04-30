@@ -1,46 +1,64 @@
 # ===================================================
-# THE 8 QUEENS PROBLEM - DISTINCT SOLUTIONS (RANDOM)
+# THE N QUEENS PROBLEM - DISTINCT SOLUTIONS (RANDOM)
 # ===================================================
 # Tries to find (through simulation) the number of distinct solutions
-#  to the 8 queens problem, using the random algorithm.
-# Has an error! Reports more solutions than it should.
+#  to the N-queens problem, using the random algorithm.
 
+import argparse
 from time import time
-from queens import eightQueensRandom, showSolution
-
-N_solutions = 10**3
-
-solutionSet = set()
+from queens import nQueensRandom, showSolution
 
 def clockwiseRotate(solution):
 	rotated = len(solution)*[-1]
 	for col, row in enumerate(solution):
-		rotated[7-row] = col
+		rotated[(N-1)-row] = col
 	return rotated
 
 def verticalReflect(solution):
-	return [7-row for row in solution]
+	return [(N-1)-row for row in solution]
 
-start = time()
 
-for i in range(N_solutions):
-	sol, attempts, timeTaken = eightQueensRandom()
-	solutionIsNew = True
-	
-	solCopy = sol[::]
-	for j in range(4):
-		rotated = clockwiseRotate(solCopy)
-		reflected = verticalReflect(solCopy)
-		if (tuple(rotated) in solutionSet) or (tuple(reflected) in solutionSet):
+
+if __name__ == '__main__':
+
+	# Initialize parser
+	parser = argparse.ArgumentParser(
+		description = "N-Queens: Distinct Solutions Finder (Random)"
+	)
+
+	# Positional parameters
+	parser.add_argument('--n', help="N value (problem size)", type=int, default=8)
+	parser.add_argument('--k', help="Number of generated solutions", type=int, default=1000)
+
+	# Parse the arguments
+	args = parser.parse_args()
+
+	N = args.n
+	N_SOLUTIONS = args.k
+
+	solutionSet = set()
+	start = time()
+
+	for i in range(N_SOLUTIONS):
+		sol, attempts, timeTaken = nQueensRandom(n=N)
+		solutionIsNew = True
+
+		if not sol:
 			solutionIsNew = False
-			break
-		solCopy = rotated[::]
+		
+		solCopy = sol[::]
+		for j in range(4):
+			rotated = clockwiseRotate(solCopy)
+			reflected = verticalReflect(solCopy)
+			if (tuple(rotated) in solutionSet) or (tuple(reflected) in solutionSet):
+				solutionIsNew = False
+				break
+			solCopy = rotated[::]
 
-	if solutionIsNew:
-		solutionSet.add(tuple(sol))
-		showSolution(sol)
-		print()
+		if solutionIsNew:
+			solutionSet.add(tuple(sol))
+			#showSolution(sol)
 
-totalTime = round(time() - start, 3)
+	totalTime = round(time() - start, 3)
 
-print(f"Gathered {len(solutionSet)} distinct solutions in {totalTime} seconds.")
+	print(f"Found {len(solutionSet)} distinct solutions for the {N}-queens problem, in {totalTime} seconds.")

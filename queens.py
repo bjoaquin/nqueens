@@ -1,18 +1,17 @@
 # ==================================
-# THE 8 QUEENS PROBLEM - ALGORITHMS
+# THE N QUEENS PROBLEM - ALGORITHMS
 # ==================================
 # Contains two implementations of an 8-queens search algorithm.
-# One makes random attempts until success (not yet generalized for any N,
-#  would run forever if no solution).
-# The other searches in an organized manner until finding a solution, 
-#  if it exists. Works for any N.
+# One makes random attempts until success. The other searches in an organized
+#  manner until finding a solution, if it exists. Both work for any N.
 # If run, it performs a single search (linear or random) and prints the result.
 
+import argparse
 from random import randint
 from time import time
 
 
-def eightQueensRandom():
+def nQueensRandom(n=8, initialState=[]):
 	
 	def setToList(mySet):
 		L = len(mySet)*[-1]
@@ -20,40 +19,60 @@ def eightQueensRandom():
 			L[elem[1]] = elem[0]
 		return L
 
+	def knockOutCells(matrix, col, row):
+		# take all the cells from this position's row/column
+		for j in range(n):
+			matrix[col][j] = 0
+			matrix[j][row] = 0
+		# and also from its diagonals,
+		LD, UD = -min(col,row), (n-1)-max(col,row)
+		for j in range(LD, UD+1):
+			matrix[col+j][row+j] = 0
+		LaD, UaD = -min((n-1)-col,row), (n-1)-max((n-1)-col,row)
+		for j in range(LaD, UaD+1):
+			matrix[col-j][row+j] = 0
+		return matrix
+
 	start = time()
-	M = [8*[1] for _ in range(8)]	# valid positions for next queen
-	Q = []							# position of queens already placed on board
 	attempts = 1
+	M = [n*[1] for _ in range(n)]	# valid positions for next queen
+	Q = []							# position of queens already placed on board
+	for row, col in enumerate(initialState):
+		if col != -1 and M[col][row] == 1:
+			M = knockOutCells(M, col, row)
+			Q.append((col, row))
+		else:
+			print('ERROR: Invalid initial state')
+			return [], 1, 0
 
 	# While the board is still incomplete,
-	while len(Q) < 8:
+	while len(Q) < n and attempts < 1000:
 		# generate a random position
-		a, b = randint(0, 7), randint(0, 7)
+		a, b = randint(0, n-1), randint(0, n-1)
 		# (which hasn't been taken yet),
 		while M[a][b]==0:
-			a, b = randint(0, 7), randint(0, 7)
+			a, b = randint(0, n-1), randint(0, n-1)
 		# take all the cells from this position's row/column
-		for j in range(8):
-			M[a][j] = 0 # j-th elem of a-th list
-			M[j][b] = 0 # b-th elem of j-th list
-		# and also from its diagonals,
-		lower_diag, upper_diag = -min(a,b), 7-max(a,b)
-		lower_anti_diag, upper_anti_diag = -min(7-a,b), 7-max(7-a,b)
-		for j in range(lower_diag, upper_diag+1):
-			M[a+j][b+j] = 0
-		for j in range(lower_anti_diag, upper_anti_diag+1):
-			M[a-j][b+j] = 0
+		M = knockOutCells(M, a, b)
 		# and append it to the list of queens.
 		Q.append((a, b))
 		# If all cells are taken but there's less than N queens,
-		if sum([sum(m) for m in M])==0 and len(Q)<8:
+		if sum([sum(m) for m in M])==0 and len(Q)<n:
 			# restart everything.
-			M = [8*[1] for _ in range(8)]
+			M = [n*[1] for _ in range(n)]
 			Q = []
+			for row, col in enumerate(initialState):
+				if col != -1:
+					M = knockOutCells(M, col, row)
+					Q.append((col, row))
 			attempts += 1
-	# If you reach this then a solution has been found.
-	# How long did it take to reach it?
+	
+	# Either a solution was found and time ran out.
+	# How long did it take?
 	timeTaken = 1000 * (time() - start)
+
+	if not Q:
+		print("No solution found after 1000 attempts. Maybe there's no solution?")
 	
 	return setToList(Q), attempts, timeTaken
 
@@ -153,11 +172,38 @@ def showSolution(solution):
 
 if __name__ == '__main__':
 
-	mySolution, myTimeTaken = nQueensLinear(n=22, initialState=[])
-	print(f"Done! Took {round(myTimeTaken, 2)} milliseconds.")
-	
-	#mySolution, myAttempts, myTimeTaken = eightQueensRandom()
-	#print(f"Done! Took {myAttempts} attempts ({round(myTimeTaken, 2)} milliseconds).")
+	# Initialize parser
+	parser = argparse.ArgumentParser(
+		description = "N-Queens Solver"
+	)
+
+	# Positional parameters
+	parser.add_argument(
+		'--n', help="N value (problem size)", 
+		type=int, default=8
+	)
+	parser.add_argument(
+		'--algo', help="Algorithm ('linear' or 'random')",
+		default="linear"
+	)
+	parser.add_argument('--init', nargs='+', 
+		help="Initial state"
+	)
+
+	# Parse the arguments
+	args = parser.parse_args()
+
+	if args.init:
+		initialState = [int(x) for x in args.init]
+	else:
+		initialState = []
+
+	if args.algo == 'linear':
+		mySolution, myTimeTaken = nQueensLinear(n=args.n, initialState=initialState)
+		print(f"Done! Took {round(myTimeTaken, 2)} milliseconds.")
+	else:
+		mySolution, myAttempts, myTimeTaken = nQueensRandom(n=args.n, initialState=initialState)
+		print(f"Done! Took {myAttempts} attempts ({round(myTimeTaken, 2)} milliseconds).")
 	
 	print(mySolution)
 	showSolution(mySolution)
